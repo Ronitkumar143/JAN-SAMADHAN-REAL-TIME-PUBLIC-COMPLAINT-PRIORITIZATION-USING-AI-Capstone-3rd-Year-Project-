@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <title>File a Complaint | SmartComplaints AI</title>
+    <link rel="stylesheet" href="style1.css">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">SmartComplaints AI</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="report.html">File Complaint</a></li>
+            <li><a href="admin.html">Admin Portal</a></li>
+        </ul>
+    </nav>
+
+    <section id="report-form" class="py-16">
+        <div class="container">
+            <div class="text-center mb-8">
+                <h3 class="text-3xl font-bold mb-4">Report a New Complaint</h3>
+                <p>Fill in the details below. Our AI will analyze and prioritize your complaint automatically.</p>
+            </div>
+            
+            <form id="complaint-form">
+                <div class="grid">
+                    <div>
+                        <label>Full Name</label>
+                        <input type="text" placeholder="rohit vats" required>
+                    </div>
+                    <div>
+                        <label>Contact Number</label>
+                        <input type="tel" placeholder="+91 9209260041" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="email@example.com" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Complaint Title</label>
+                        <input type="text" placeholder="Brief description of your issue" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Complaint Category</label>
+                        <select required>
+                            <option value="">Select a category</option>
+                            <option value="infrastructure">Infrastructure & Roads</option>
+                            <option value="sanitation">Sanitation & Waste Management</option>
+                            <option value="water">Water Supply</option>
+                            <option value="electricity">Electricity Issues</option>
+                            <option value="security">Public Safety & Security</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Detailed Description</label>
+                        <textarea rows="4" placeholder="Provide detailed information..." required></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Upload Evidence (Optional)</label>
+                        <input type="file" multiple>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Location</label>
+                        <input type="text" placeholder="Enter your location or address" required>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-between">
+                    <button type="button" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-submit">Submit Complaint</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</body>
+</html>

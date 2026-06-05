@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Complaint | JanSamadhan</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="mob-bar">
+  <div class="mob-logo">Jan<span>Samadhan</span></div>
+  <button class="mob-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <i class="fas fa-bars"></i>
+  </button>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-text">Jan<span>Samadhan</span></div>
+      <p>Citizen Portal</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="avatar-init">?</div>
+      <div class="user-info">
+        <div class="name" id="user-name">Loading…</div>
+        <div class="role">Citizen</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="/submit-complaint" class="nav-item active"><i class="fas fa-plus-circle"></i> File Complaint</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    </div>
+  </aside>
+
+  <main class="page-content">
+    <div class="topbar">
+      <div>
+        <h1>File a Complaint</h1>
+        <div class="sub">Describe your issue and our AI will categorize it instantly</div>
+      </div>
+    </div>
+
+    <div class="card-box" style="max-width:720px" id="form-wrap">
+      <div class="card-box-header">
+        <h3><i class="fas fa-edit" style="color:var(--accent);margin-right:8px"></i>Complaint Details</h3>
+      </div>
+      <div class="card-box-body">
+        <div class="alert alert-error" id="err-msg"></div>
+
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Complaint Title <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="title" placeholder="Brief summary of your issue">
+          </div>
+          <div class="form-group">
+            <label>Category (Manual)</label>
+            <select id="manual-category">
+              <option value="">— Let AI decide —</option>
+              <option value="Infrastructure & Roads">Infrastructure & Roads</option>
+              <option value="Sanitation & Waste">Sanitation & Waste</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Public Safety">Public Safety</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="location" placeholder="Area / Ward / City">
+          </div>
+          <div class="form-group full">
+            <label>Detailed Description <span style="color:var(--danger)">*</span></label>
+            <textarea id="complaint-text" rows="5" placeholder="Describe the problem in detail. Include relevant facts, dates, and any attempts to resolve it previously…"></textarea>
+          </div>
+        </div>
+
+        <div class="ai-result-box" id="ai-result">
+          <div class="ai-label"><i class="fas fa-brain"></i> AI Predicted Category</div>
+          <div class="ai-value" id="ai-value">—</div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end">
+          <a href="/dashboard" class="btn btn-outline">Cancel</a>
+          <button class="btn btn-dark" onclick="submitComplaint()" id="submit-btn">
+            <i class="fas fa-paper-plane"></i> Submit Complaint
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div class="card-box success-state" id="success-wrap" style="max-width:720px">
+      <div class="check-icon"><i class="fas fa-check"></i></div>
+      <h3>Complaint Submitted!</h3>
+      <p>Your complaint has been received and the AI has analysed it.</p>
+      <div class="cid" id="success-id">—</div>
+      <p id="success-cat" style="color:var(--muted);margin-bottom:20px"></p>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a href="/submit-complaint" class="btn btn-outline">File Another</a>
+        <a href="/dashboard" class="btn btn-dark">View My Complaints</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(async function() {
+  const me = await fetch('/api/me').then(r=>r.json());
+  if (!me.logged_in) { window.location.href='/login'; return; }
+  document.getElementById('user-name').textContent = me.name;
+  document.getElementById('avatar-init').textContent = me.name[0].toUpperCase();
+})();
+
+async function submitComplaint() {
+  const title = document.getElementById('title').value.trim();
+  const text = document.getElementById('complaint-text').value.trim();
+  const location = document.getElementById('location').value.trim();
+  const manual = document.getElementById('manual-category').value;
+  const err = document.getElementById('err-msg');
+  const btn = document.getElementById('submit-btn');
+  err.style.display = 'none';
+
+  if (!title || !text) {
+    err.textContent = 'Title and description are required.';
+    err.style.display = 'block'; return;
+  }
+
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analysing…';
+  btn.disabled = true;
+
+  const res = await fetch('/api/submit', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ title, complaint: text, location, manual_category: manual })
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    document.getElementById('form-wrap').style.display = 'none';
+    const sw = document.getElementById('success-wrap');
+    sw.style.display = 'block';
+    document.getElementById('success-id').textContent = '#' + data.complaint.id;
+    document.getElementById('success-cat').textContent = 'AI Category: ' + data.complaint.ai_category;
+  } else {
+    err.textContent = data.error || 'Server error.';
+    err.style.display = 'block';
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Complaint';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard | Smart Analysis System</title>
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Smart Analysis System</h2>
+        <ul>
+            <li>Dashboard Overview</li>
+            <li>Pending Complaints</li>
+            <li>Resolved Issues</li>
+            <li>Analytics Reports</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>Admin Overview</h1>
+        
+        <div class="dashboard-cards">
+            <div class="card" style="border-top: 5px solid #e74c3c;">
+                <p>High Priority</p>
+                <h3>12</h3>
+            </div>
+            <div class="card" style="border-top: 5px solid #3498db;">
+                <p>Total Complaints</p>
+                <h3>145</h3>
+            </div>
+            <div class="card" style="border-top: 5px solid #2ecc71;">
+                <p>Resolved</p>
+                <h3>110</h3>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h2>Recent AI Predictions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Complaint ID</th>
+                        <th>Category</th>
+                        <th>AI Predicted Urgency</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#1001</td>
+                        <td>Water Supply</td>
+                        <td><span class="priority-badge priority-high">High Priority</span></td>
+                        <td>Pending</td>
+                    </tr>
+                    <tr>
+                        <td>#1002</td>
+                        <td>Sanitation</td>
+                        <td><span class="priority-badge priority-medium">Medium Priority</span></td>
+                        <td>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>#1003</td>
+                        <td>Roads</td>
+                        <td><span class="priority-badge priority-low">Low Priority</span></td>
+                        <td>Reviewing</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

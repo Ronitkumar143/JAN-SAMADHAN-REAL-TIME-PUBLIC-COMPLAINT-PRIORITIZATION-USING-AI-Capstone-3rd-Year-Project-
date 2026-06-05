@@ -1,0 +1,36 @@
+<style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Arial', sans-serif; display: flex; background: #f0f2f5; }
+
+        
+      .sidebar {
+            width: 200px;
+            background: #fdfbf7;
+            color: blue;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+        }
+
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; border-bottom: 1px solid #555; padding-bottom: 10px; }
+
+        .sidebar ul { list-style: none; }
+
+        .sidebar li { padding: 15px 0; border-bottom: 1px solid #e9edf1; cursor: pointer; }
+        .sidebar li:hover { color: #3498db; }
+
+        
+        .main-content { margin-left: 240px; padding: 30px; width: 100%; background-color: rgb(252, 200, 252); }
+
+         .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
+
+        th { background-color: #f8f9fa; }

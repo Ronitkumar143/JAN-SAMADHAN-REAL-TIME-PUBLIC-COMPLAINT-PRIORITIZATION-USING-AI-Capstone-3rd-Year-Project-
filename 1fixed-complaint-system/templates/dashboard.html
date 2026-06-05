@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard | JanSamadhan</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Mobile Top Bar -->
+<div class="mob-bar">
+  <div class="mob-logo">Jan<span>Samadhan</span></div>
+  <button class="mob-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <i class="fas fa-bars"></i>
+  </button>
+</div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-text">Jan<span>Samadhan</span></div>
+      <p>Citizen Portal</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="avatar-init">?</div>
+      <div class="user-info">
+        <div class="name" id="user-name">Loading…</div>
+        <div class="role">Citizen</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard" class="nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="/submit-complaint" class="nav-item"><i class="fas fa-plus-circle"></i> File Complaint</a>
+      <div class="nav-label" style="margin-top:12px">My Complaints</div>
+      <div class="nav-item" onclick="filterComplaints('all')" id="filter-all"><i class="fas fa-list"></i> All</div>
+      <div class="nav-item" onclick="filterComplaints('Pending')" id="filter-pending"><i class="fas fa-clock"></i> Pending <span class="badge" id="pending-badge">0</span></div>
+      <div class="nav-item" onclick="filterComplaints('In Progress')" id="filter-progress"><i class="fas fa-spinner"></i> In Progress</div>
+      <div class="nav-item" onclick="filterComplaints('Resolved')" id="filter-resolved"><i class="fas fa-check-circle"></i> Resolved</div>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="page-content">
+    <div class="topbar">
+      <div>
+        <h1 id="greeting">My Dashboard</h1>
+        <div class="sub">Track all your submitted grievances</div>
+      </div>
+      <a href="/submit-complaint" class="btn btn-dark"><i class="fas fa-plus"></i> New Complaint</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-card blue">
+        <div class="label">Total Filed</div>
+        <div class="value" id="s-total">0</div>
+        <i class="fas fa-file-alt stat-icon"></i>
+      </div>
+      <div class="stat-card amber">
+        <div class="label">Pending</div>
+        <div class="value" id="s-pending">0</div>
+        <i class="fas fa-clock stat-icon"></i>
+      </div>
+      <div class="stat-card green">
+        <div class="label">Resolved</div>
+        <div class="value" id="s-resolved">0</div>
+        <i class="fas fa-check stat-icon"></i>
+      </div>
+      <div class="stat-card orange">
+        <div class="label">In Progress</div>
+        <div class="value" id="s-progress">0</div>
+        <i class="fas fa-spinner stat-icon"></i>
+      </div>
+    </div>
+
+    <!-- Complaints List -->
+    <div class="card-box">
+      <div class="card-box-header">
+        <h3 id="list-title">All Complaints</h3>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search complaints…" oninput="searchComplaints(this.value)">
+        </div>
+      </div>
+      <div class="card-box-body" id="complaints-container">
+        <div class="empty-state"><i class="fas fa-inbox"></i><p>Loading…</p></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+let allComplaints = [];
+let currentFilter = 'all';
+
+async function loadData() {
+  const me = await fetch('/api/me').then(r=>r.json());
+  if (!me.logged_in) { window.location.href='/login'; return; }
+  document.getElementById('user-name').textContent = me.name;
+  document.getElementById('avatar-init').textContent = me.name[0].toUpperCase();
+  document.getElementById('greeting').textContent = 'Hello, ' + me.name.split(' ')[0] + ' 👋';
+
+  const data = await fetch('/api/my-complaints').then(r=>r.json());
+  allComplaints = data;
+  updateStats();
+  renderComplaints(allComplaints);
+}
+
+function updateStats() {
+  const total = allComplaints.length;
+  const pending = allComplaints.filter(c=>c.status==='Pending').length;
+  const resolved = allComplaints.filter(c=>c.status==='Resolved').length;
+  const progress = allComplaints.filter(c=>c.status==='In Progress').length;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-pending').textContent = pending;
+  document.getElementById('s-resolved').textContent = resolved;
+  document.getElementById('s-progress').textContent = progress;
+  document.getElementById('pending-badge').textContent = pending;
+}
+
+function statusBadge(s) {
+  if (s==='Pending') return '<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>';
+  if (s==='Resolved') return '<span class="badge badge-resolved"><i class="fas fa-check"></i> Resolved</span>';
+  return '<span class="badge badge-progress"><i class="fas fa-spinner"></i> In Progress</span>';
+}
+
+function stripeClass(s) {
+  if (s==='Pending') return 'stripe-pending';
+  if (s==='Resolved') return 'stripe-resolved';
+  return 'stripe-progress';
+}
+
+function renderComplaints(list) {
+  const el = document.getElementById('complaints-container');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No complaints found.</p><a href="/submit-complaint" class="btn btn-dark" style="margin-top:14px"><i class="fas fa-plus"></i> File one now</a></div>';
+    return;
+  }
+  el.innerHTML = '<div class="complaint-list">' + list.map(c => `
+    <div class="complaint-card">
+      <div class="status-stripe ${stripeClass(c.status)}"></div>
+      <div style="padding-left:8px">
+        <div class="cc-top">
+          <div class="cc-title">${c.title}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            ${statusBadge(c.status)}
+            <span class="cc-id">#${c.id}</span>
+          </div>
+        </div>
+        <div class="cc-text">${c.complaint}</div>
+        <div class="cc-meta">
+          <span><i class="fas fa-tag"></i> ${c.ai_category}</span>
+          ${c.location ? `<span><i class="fas fa-map-marker-alt"></i> ${c.location}</span>` : ''}
+          <span><i class="fas fa-calendar"></i> ${c.submitted_at}</span>
+          ${c.resolved_at ? `<span><i class="fas fa-check-circle" style="color:var(--success)"></i> Resolved: ${c.resolved_at}</span>` : ''}
+        </div>
+        ${c.admin_note ? `<div class="cc-note"><i class="fas fa-comment-dots"></i> Admin note: ${c.admin_note}</div>` : ''}
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+function filterComplaints(f) {
+  currentFilter = f;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('filter-' + (f==='all'?'all':f==='Pending'?'pending':f==='In Progress'?'progress':'resolved')).classList.add('active');
+  const labels = {'all':'All Complaints','Pending':'Pending Complaints','Resolved':'Resolved Complaints','In Progress':'In Progress'};
+  document.getElementById('list-title').textContent = labels[f] || f;
+  const filtered = f==='all' ? allComplaints : allComplaints.filter(c=>c.status===f);
+  renderComplaints(filtered);
+}
+
+function searchComplaints(q) {
+  const base = currentFilter==='all' ? allComplaints : allComplaints.filter(c=>c.status===currentFilter);
+  const filtered = base.filter(c => c.title.toLowerCase().includes(q.toLowerCase()) || c.complaint.toLowerCase().includes(q.toLowerCase()));
+  renderComplaints(filtered);
+}
+
+loadData();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+Admin login is configured in app.py:
+ADMIN_ID = admin@829206
+ADMIN_PASS = 123456
+
+Admin users are redirected to /admin and cannot access the complaint submission form.
+The admin dashboard allows complaint status updates (Pending, In Progress, Resolved).
